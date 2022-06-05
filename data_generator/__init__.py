@@ -1,1 +1,2 @@
 from data_generator.data_generator import ActionKeypointsGenerator
+from data_generator.data_generator import encode_label

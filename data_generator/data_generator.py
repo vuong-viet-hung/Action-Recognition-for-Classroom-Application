@@ -11,39 +11,42 @@ from keypoints_extractor import extract_keypoints
 DATA_PATH = "../data/UCF101/UCF-101"
 
 
-class ActionKeypointsGenerator(keras.utils.Sequence):
+def encode_label(label: str) -> int:
     labels = [directory.name for directory in Path(DATA_PATH).iterdir()]
     labels_map = dict(((label, idx) for (idx, label) in enumerate(labels)))
+    return labels_map[label]
 
-    def __init__(self, video_paths: List[str], batch_size: int, shuffle: bool = True) -> None:
-        self.video_paths: List[str] = video_paths
+
+class ActionKeypointsGenerator(keras.utils.Sequence):
+    def __init__(self, data_paths: List[str], labels: List[int], batch_size: int) -> None:
+        self.data_paths: List[str] = data_paths
+        self.labels: List[int] = labels
         self.batch_size: int = batch_size
-        if shuffle:
-            random.shuffle(video_paths)
 
     def __getitem__(self, idx) -> Tuple[np.ndarray, np.ndarray]:
-        data_size = len(self.video_paths)
+        data_size = len(self.data_paths)
         n_batches = data_size // self.batch_size
         batch_start = self.batch_size * idx
         batch_end = self.batch_size * (idx + 1) if idx < n_batches else data_size
 
         keypoints = []
-        encoded_labels = []
+        labels = []
 
-        for video_path in self.video_paths[batch_start:batch_end]:
-            keypoints.append(extract_keypoints(video_path))
-            encoded_labels.append(self.labels_map[str(Path(video_path).parent.name)])
+        for data_path, label in zip(self.data_paths[batch_start:batch_end], self.labels[batch_start:batch_end]):
+            keypoints.append(extract_keypoints(data_path))
+            labels.append(label)
 
-        return np.array(keypoints), np.array(encoded_labels)
+        return np.array(keypoints), np.array(labels)
 
     def __len__(self) -> int:
-        return len(self.video_paths)
+        return len(self.data_paths)
 
 
 def demo() -> None:
     assert Path(DATA_PATH).is_dir()
-    video_paths = [str(video_path) for video_path in Path(DATA_PATH).glob("**/*.avi")]
-    data_generator = ActionKeypointsGenerator(video_paths, batch_size=8)
+    data_paths = [str(data_path) for data_path in Path(DATA_PATH).glob("**/*.avi")]
+    labels = [encode_label(Path(data_path).parent.name) for data_path in data_paths]
+    data_generator = ActionKeypointsGenerator(data_paths, labels, batch_size=8)
     for keypoints, labels in data_generator:
         print(f"{keypoints.shape = }\t{labels.shape = }")
 
