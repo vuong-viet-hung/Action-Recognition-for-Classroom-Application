@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "action-recognition-for-classroom-application"
+version = "0.1.0"
+description = "The program recognizes an orchestrator's actions through body landmarks. The recognized actions are used to control multiple classroom's devices."
+authors = ["vuong-viet-hung <vuongviethung156@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "3.10.4"
+mediapipe = "^0.8.10"
+tensorflow = "^2.9.1"
+scikit-learn = "^1.1.1"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
