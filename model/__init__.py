@@ -1,1 +1,1 @@
-from model.lstm_model import LSTMModel
+from model.lstm_model import make_model
