@@ -21,9 +21,9 @@ def main() -> None:
 
     # Split the data into train and test set
     train_data_paths, test_data_paths, train_labels, test_labels = train_test_split(
-        data_paths,
+        data_paths, 
         labels,
-        test_size=0.25,
+        test_size=0.25, 
         stratify=labels,
     )
 
@@ -44,6 +44,7 @@ def main() -> None:
         callbacks=[checkpoint_callback, early_stopping_callback, tensorboard_callback],
         validation_data=test_data_generator,
     )
+    model.save(str(Path(CHECKPOINT_PATH)))
 
 
 if __name__ == "__main__":

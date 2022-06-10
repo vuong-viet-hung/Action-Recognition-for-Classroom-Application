@@ -9,6 +9,7 @@ python = "3.10.4"
 mediapipe = "^0.8.10"
 tensorflow = "^2.9.1"
 scikit-learn = "^1.1.1"
+kaggle = "^1.5.12"
 
 [tool.poetry.dev-dependencies]
 
