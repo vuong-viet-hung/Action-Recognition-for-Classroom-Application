@@ -5,7 +5,7 @@ import mediapipe as mp
 import numpy as np
 
 
-KEYPOINTS_DIMS = (120, 33 * 4)
+KEYPOINTS_DIMS = (128, 33 * 4)
 
 
 def extract_keypoints(video_path: int | str) -> np.ndarray:
@@ -49,7 +49,8 @@ def extract_keypoints(video_path: int | str) -> np.ndarray:
                     for value in results.pose_landmarks.landmark
                 ]
             )
-            keypoints.extend(keypoint)
+            keypoint = keypoint.flatten()
+            keypoints.append(keypoint)
 
     capture.release()
 

@@ -8,19 +8,22 @@ from data_processing import (
     sample_data,
     train_valid_test_split,
 )
-from model import LSTMModel
+from model import make_model
 
 
 DATA_PATH = "data/UCF101/UCF-101/"
-N_CLASSES = 5
-CHECKPOINT_PATH = "saved_model/lstm_model.hdf5"
+N_CLASSES = 2
+N_SAMPLES_PER_CLASSES = 10
+CHECKPOINT_PATH = "checkpoint/"
+SAVED_MODEL_PATH = "saved_model/lstm_model.h5"
 LOGS_PATH = "logs/"
+EPOCHS = 100
 BATCH_SIZE = 8
 
 
 def main() -> None:
-    selected_classes_directories = list(sample_classes(DATA_PATH, N_CLASSES))
-    data_paths = list(sample_data(selected_classes_directories))
+    selected_classes_directories = sample_classes(DATA_PATH, N_CLASSES)
+    data_paths = sample_data(selected_classes_directories, unique_groups=False)
     string_labels = [data_path.parent.name for data_path in data_paths]
 
     # Split the data into train and test set
@@ -44,6 +47,8 @@ def main() -> None:
         for selected_class_directory in selected_classes_directories
     ]
 
+    print(selected_classes)
+
     train_data_generator = ActionKeypointsGenerator(
         train_data_paths, train_labels, selected_classes, BATCH_SIZE
     )
@@ -64,7 +69,7 @@ def main() -> None:
     )
 
     # Train the model
-    model = LSTMModel(N_CLASSES)
+    model = make_model(N_CLASSES)
     model.compile(
         optimizer="adam",
         loss="categorical_crossentropy",
@@ -72,11 +77,14 @@ def main() -> None:
     )
     model.fit(
         train_data_generator,
-        callbacks=[checkpoint_callback, early_stopping_callback, tensorboard_callback],
+        callbacks=[early_stopping_callback, tensorboard_callback],
         validation_data=valid_data_generator,
+        epochs=EPOCHS,
     )
-    model.evaluate(test_data_generator, callbacks=[tensorboard_callback])
-    model.save(str(Path(CHECKPOINT_PATH)))
+    model.evaluate(
+        test_data_generator, callbacks=[checkpoint_callback, early_stopping_callback, tensorboard_callback]
+    )
+    model.save(str(Path(SAVED_MODEL_PATH)))
 
 
 if __name__ == "__main__":
