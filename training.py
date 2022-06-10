@@ -1,7 +1,7 @@
 from pathlib import Path
 
-import keras.callbacks
 from sklearn.model_selection import train_test_split
+from tensorflow import keras
 
 from data_generator import ActionKeypointsGenerator
 from model import LSTMModel
@@ -10,7 +10,7 @@ from model import LSTMModel
 DATA_PATH = "data/UCF101/UCF-101/"
 CHECKPOINT_PATH = "saved_model/lstm_model.hdf5"
 LOGS_PATH = "logs/"
-BATCH_SIZE = 8
+BATCH_SIZE = 32
 
 
 def main() -> None:
@@ -20,7 +20,12 @@ def main() -> None:
     labels = [Path(data_path).parent.name for data_path in data_paths]
 
     # Split the data into train and test set
-    train_data_paths, test_data_paths, train_labels, test_labels = train_test_split(data_paths, labels, stratify=labels)
+    train_data_paths, test_data_paths, train_labels, test_labels = train_test_split(
+        data_paths,
+        labels,
+        test_size=0.25,
+        stratify=labels,
+    )
 
     # Create train and test data generator
     train_data_generator = ActionKeypointsGenerator(train_data_paths, train_labels, batch_size=BATCH_SIZE)
