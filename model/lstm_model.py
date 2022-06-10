@@ -14,11 +14,14 @@ class LSTMModel(keras.Model):
         self.model = keras.models.Sequential(
             [
                 keras.layers.Input(shape=KEYPOINTS_DIMS),
-                keras.layers.LSTM(units=64, return_sequences=True, activation="relu"),
-                keras.layers.LSTM(units=128, return_sequences=True, activation="relu"),
-                keras.layers.LSTM(units=64, return_sequences=False, activation="relu"),
-                keras.layers.Dense(units=64, activation="relu"),
-                keras.layers.Dense(units=32, activation="relu"),
+                keras.layers.LSTM(units=256, return_sequences=True, activation="relu"),
+                keras.layers.LSTM(units=256, return_sequences=True, activation="relu"),
+                keras.layers.LSTM(units=512, return_sequences=True, activation="relu"),
+                keras.layers.LSTM(units=512, return_sequences=True, activation="relu"),
+                keras.layers.LSTM(units=256, return_sequences=False, activation="relu"),
+                keras.layers.Dense(units=256, activation="relu"),
+                keras.layers.Dense(units=128, activation="relu"),
+                keras.layers.Dense(units=128, activation="relu"),
                 keras.layers.Dense(units=N_CLASSES, activation="softmax"),
             ]
         )
