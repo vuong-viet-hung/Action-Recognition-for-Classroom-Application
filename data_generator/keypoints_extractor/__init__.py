@@ -1,1 +1,1 @@
-from keypoints_extractor.keypoints_extractor import extract_keypoints
+from data_generator.keypoints_extractor.keypoints_extractor import extract_keypoints

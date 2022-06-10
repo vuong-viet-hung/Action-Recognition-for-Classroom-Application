@@ -5,7 +5,7 @@ import mediapipe as mp
 import numpy as np
 
 
-DATA_PATH = "../../data/UCF101/UCF-101"
+DATA_PATH = "data/UCF101/UCF-101"
 KEYPOINTS_DIMS = (120, 33 * 4)
 
 
@@ -53,6 +53,7 @@ def extract_keypoints(video_path: int | str) -> np.ndarray:
             keypoints.extend(keypoint)
 
     capture.release()
+
     try:
         keypoints = cv2.resize(np.array(keypoints), KEYPOINTS_DIMS[::-1])
     except cv2.error:
