@@ -1,0 +1,1 @@
+from data_processing.keypoints_extractor.keypoints_extractor import extract_keypoints

@@ -1,49 +1,81 @@
 from pathlib import Path
 
-from sklearn.model_selection import train_test_split
 from tensorflow import keras
 
-from data_generator import ActionKeypointsGenerator
+from data_processing import (
+    ActionKeypointsGenerator,
+    sample_classes,
+    sample_data,
+    train_valid_test_split,
+)
 from model import LSTMModel
 
 
 DATA_PATH = "data/UCF101/UCF-101/"
+N_CLASSES = 5
 CHECKPOINT_PATH = "saved_model/lstm_model.hdf5"
 LOGS_PATH = "logs/"
-BATCH_SIZE = 32
+BATCH_SIZE = 8
 
 
 def main() -> None:
-    assert Path(DATA_PATH).is_dir()
-
-    data_paths = [str(data_path) for data_path in Path(DATA_PATH).glob("**/*.avi")]
-    labels = [Path(data_path).parent.name for data_path in data_paths]
+    selected_classes_directories = list(sample_classes(DATA_PATH, N_CLASSES))
+    data_paths = list(sample_data(selected_classes_directories))
+    string_labels = [data_path.parent.name for data_path in data_paths]
 
     # Split the data into train and test set
-    train_data_paths, test_data_paths, train_labels, test_labels = train_test_split(
-        data_paths, 
-        labels,
-        test_size=0.25, 
-        stratify=labels,
+    (
+        train_data_paths,
+        valid_data_paths,
+        test_data_paths,
+        train_labels,
+        valid_labels,
+        test_labels,
+    ) = train_valid_test_split(
+        data_paths,
+        string_labels,
+        valid_size=0.1,
+        test_size=0.1,
     )
 
     # Create train and test data generator
-    train_data_generator = ActionKeypointsGenerator(train_data_paths, train_labels, batch_size=BATCH_SIZE)
-    test_data_generator = ActionKeypointsGenerator(test_data_paths, test_labels, batch_size=BATCH_SIZE)
+    selected_classes = [
+        selected_class_directory.name
+        for selected_class_directory in selected_classes_directories
+    ]
+
+    train_data_generator = ActionKeypointsGenerator(
+        train_data_paths, train_labels, selected_classes, BATCH_SIZE
+    )
+    valid_data_generator = ActionKeypointsGenerator(
+        valid_data_paths, valid_labels, selected_classes, BATCH_SIZE
+    )
+    test_data_generator = ActionKeypointsGenerator(
+        test_data_paths, test_labels, selected_classes, BATCH_SIZE
+    )
 
     # Define callbacks for training
-    checkpoint_callback = keras.callbacks.ModelCheckpoint(filepath=str(Path(CHECKPOINT_PATH)), save_best_only=True)
+    checkpoint_callback = keras.callbacks.ModelCheckpoint(
+        filepath=str(Path(CHECKPOINT_PATH)), save_best_only=True
+    )
     early_stopping_callback = keras.callbacks.EarlyStopping(patience=5)
-    tensorboard_callback = keras.callbacks.TensorBoard(log_dir=str(Path(LOGS_PATH)), histogram_freq=1)
+    tensorboard_callback = keras.callbacks.TensorBoard(
+        log_dir=str(Path(LOGS_PATH)), histogram_freq=1
+    )
 
     # Train the model
-    model = LSTMModel()
-    model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["categorical_accuracy"])
+    model = LSTMModel(N_CLASSES)
+    model.compile(
+        optimizer="adam",
+        loss="categorical_crossentropy",
+        metrics=["categorical_accuracy"],
+    )
     model.fit(
         train_data_generator,
         callbacks=[checkpoint_callback, early_stopping_callback, tensorboard_callback],
-        validation_data=test_data_generator,
+        validation_data=valid_data_generator,
     )
+    model.evaluate(test_data_generator, callbacks=[tensorboard_callback])
     model.save(str(Path(CHECKPOINT_PATH)))
 
 

@@ -5,7 +5,6 @@ import mediapipe as mp
 import numpy as np
 
 
-DATA_PATH = "data/UCF101/UCF-101"
 KEYPOINTS_DIMS = (120, 33 * 4)
 
 
@@ -57,17 +56,6 @@ def extract_keypoints(video_path: int | str) -> np.ndarray:
     try:
         keypoints = cv2.resize(np.array(keypoints), KEYPOINTS_DIMS[::-1])
     except cv2.error:
-        return np.empty(KEYPOINTS_DIMS)
+        keypoints = np.empty(KEYPOINTS_DIMS)
 
     return keypoints
-
-
-def demo() -> None:
-    video_path = Path(f"{DATA_PATH}/ApplyEyeMakeup/v_ApplyEyeMakeup_g01_c01.avi")
-    assert video_path.is_file()
-    keypoints = extract_keypoints(str(video_path))
-    print(keypoints.shape)
-
-
-if __name__ == "__main__":
-    demo()
