@@ -1,5 +1,4 @@
 from pathlib import Path
-
 from tensorflow import keras
 
 from data_processing import (
@@ -61,7 +60,7 @@ def main() -> None:
 
     # Define callbacks for training
     checkpoint_callback = keras.callbacks.ModelCheckpoint(
-        filepath=str(Path(CHECKPOINT_PATH)), save_best_only=True
+        filepath=str(Path(CHECKPOINT_PATH))
     )
     early_stopping_callback = keras.callbacks.EarlyStopping(patience=5)
     tensorboard_callback = keras.callbacks.TensorBoard(
@@ -70,20 +69,23 @@ def main() -> None:
 
     # Train the model
     model = make_model(N_CLASSES)
+    optimizer = keras.optimizers.SGD(lr=0.01, momentum=0.9, nesterov=True, clipnorm=1.0)
     model.compile(
-        optimizer="adam",
+        optimizer=optimizer,
         loss="categorical_crossentropy",
         metrics=["categorical_accuracy"],
     )
     model.fit(
         train_data_generator,
-        callbacks=[early_stopping_callback, tensorboard_callback],
+        callbacks=[checkpoint_callback, early_stopping_callback, tensorboard_callback],
         validation_data=valid_data_generator,
         epochs=EPOCHS,
     )
-    model.evaluate(
-        test_data_generator, callbacks=[checkpoint_callback, early_stopping_callback, tensorboard_callback]
+    results = model.evaluate(
+        test_data_generator,
+        callbacks=[checkpoint_callback, early_stopping_callback, tensorboard_callback],
     )
+    print("loss, accuracy = ", results)
     model.save(str(Path(SAVED_MODEL_PATH)))
 
 
