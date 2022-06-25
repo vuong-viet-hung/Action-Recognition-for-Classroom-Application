@@ -57,6 +57,6 @@ def extract_keypoints(video_path: int | str) -> np.ndarray:
     try:
         keypoints = cv2.resize(np.array(keypoints), KEYPOINTS_DIMS[::-1])
     except cv2.error:
-        keypoints = np.empty(KEYPOINTS_DIMS)
+        keypoints = np.random.rand(*KEYPOINTS_DIMS)
 
-    return keypoints
+    return keypoints / np.linalg.norm(keypoints)
