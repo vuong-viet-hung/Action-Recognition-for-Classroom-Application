@@ -46,6 +46,9 @@ class ActionKeypointsGenerator(keras.utils.Sequence):
             keypoints.append(extract_keypoints(str(data_path)))
             labels.append(label)
 
+        assert not np.any(np.isnan(np.array(keypoints)))
+        assert not np.any(np.isnan(np.array(labels)))
+
         return np.array(keypoints), np.array(labels)
 
     def __len__(self) -> int:
