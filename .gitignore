@@ -1,6 +1,7 @@
 .mypy_cache/
 .vscode/
 *__pycache__/
-checkpoints/
+checkpoint/
 data/
 logs/
+saved_model/
